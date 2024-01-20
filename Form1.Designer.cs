@@ -35,6 +35,8 @@
             txbBraille = new TextBox();
             label1 = new Label();
             label2 = new Label();
+            cbBucketTool = new CheckBox();
+            cbBlackFill = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)pbArt).BeginInit();
             SuspendLayout();
             // 
@@ -100,11 +102,35 @@
             label2.TabIndex = 6;
             label2.Text = "Braille size: 2x3 or 2x4";
             // 
+            // cbBucketTool
+            // 
+            cbBucketTool.AutoSize = true;
+            cbBucketTool.Location = new Point(146, 94);
+            cbBucketTool.Name = "cbBucketTool";
+            cbBucketTool.Size = new Size(62, 19);
+            cbBucketTool.TabIndex = 7;
+            cbBucketTool.Text = "Bucket";
+            cbBucketTool.UseVisualStyleBackColor = true;
+            // 
+            // cbBlackFill
+            // 
+            cbBlackFill.AutoSize = true;
+            cbBlackFill.Checked = true;
+            cbBlackFill.CheckState = CheckState.Checked;
+            cbBlackFill.Location = new Point(146, 121);
+            cbBlackFill.Name = "cbBlackFill";
+            cbBlackFill.Size = new Size(54, 19);
+            cbBlackFill.TabIndex = 8;
+            cbBlackFill.Text = "Black";
+            cbBlackFill.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(407, 364);
+            Controls.Add(cbBlackFill);
+            Controls.Add(cbBucketTool);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(txbBraille);
@@ -129,5 +155,7 @@
         private TextBox txbBraille;
         private Label label1;
         private Label label2;
+        private CheckBox cbBucketTool;
+        private CheckBox cbBlackFill;
     }
 }

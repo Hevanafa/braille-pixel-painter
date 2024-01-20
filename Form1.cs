@@ -15,6 +15,7 @@ namespace BraillePixelEditor
         }
 
         DirectBitmap bmpArt;
+        
 
         private void btnRender_Click(object sender, EventArgs e)
         {
@@ -45,16 +46,16 @@ namespace BraillePixelEditor
         }
 
         bool isPainting;
-        long pickedColour;
+        //long pickedColour;
 
         private void pbArt_MouseDown(object sender, MouseEventArgs e)
         {
             isPainting = true;
 
-            var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
-            if (x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height) return;
+            //var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
+            //if (x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height) return;
 
-            pickedColour = bmpArt.GetPixel(x, y).ToArgb();
+            //pickedColour = bmpArt.GetPixel(x, y).ToArgb();
         }
 
         private void pbArt_MouseUp(object sender, MouseEventArgs e)
@@ -70,9 +71,11 @@ namespace BraillePixelEditor
 
             if (x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height) return;
 
+            var black = cbBlackFill.Checked;
+
             bmpArt.SetPixel(
                 x, y,
-                pickedColour == Color.Black.ToArgb() ? Color.White : Color.Black);
+                black ? Color.Black : Color.White);
 
             pbArt.Refresh();
         }
