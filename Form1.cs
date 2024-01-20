@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Text;
 
 namespace BraillePixelEditor
 {
@@ -25,9 +26,7 @@ namespace BraillePixelEditor
 
         private void btnRender_Click(object sender, EventArgs e)
         {
-            var result = "";
-
-            // Todo: improve with stringbuilder
+            var result = new StringBuilder();
 
             for (var outerY = 0; outerY < bmpArt.Height / 3; outerY++)
             {
@@ -38,35 +37,33 @@ namespace BraillePixelEditor
                     for (var y = 0; y < 3; y++)
                         for (var x = 0; x < 2; x++)
                         {
-                            cell[y * 2 + x] = bmpArt.GetPixel(outerX * 2 + x, outerY * 3 + y).ToArgb() == Color.Black.ToArgb() ? 1 : 0;
+                            cell[2 - y + (1 - x) * 3] =
+                                bmpArt.GetPixel(outerX * 2 + x, outerY * 3 + y).ToArgb() == Color.Black.ToArgb() ? 1 : 0;
                         }
 
-
-                    result += (char)(0x2800 + Convert.ToInt32(string.Join("", cell), 2));
+                    result.Append((char)(0x2800 + Convert.ToInt32(string.Join("", cell), 2)));
                 }
 
-                result += $"{(char)13}{(char)10}";
+                result.Append(new char[] { (char) 13, (char) 10 });
             }
 
-            txbBraille.Text = result;
+            txbBraille.Text = result.ToString();
         }
 
         bool isPainting;
-        //long pickedColour;
 
         private void pbArt_MouseDown(object sender, MouseEventArgs e)
         {
+            var (x, y) = (e.Location.X / zoomFactor, e.Location.Y / zoomFactor);
+
             if (!cbBucketTool.Checked)
             {
                 isPainting = true;
+                PutPixel(x, y);
             }
             else
             {
-                var (x, y) = (e.Location.X / zoomFactor, e.Location.Y / zoomFactor);
-
-                //pickedColour = bmpArt.GetPixel(x, y).ToArgb();
                 FloodFill(x, y);
-
                 pbArt.Refresh();
             }
         }
@@ -90,6 +87,18 @@ namespace BraillePixelEditor
             FloodFill(x, y + 1);
         }
 
+        void PutPixel(int x, int y) {
+            if (!InsideBounds(x, y)) return;
+
+            var black = cbBlackFill.Checked;
+
+            bmpArt.SetPixel(
+                x, y,
+                black ? Color.Black : Color.White);
+
+            pbArt.Refresh();
+        }
+
         private void pbArt_MouseUp(object sender, MouseEventArgs e)
         {
             isPainting = false;
@@ -101,15 +110,7 @@ namespace BraillePixelEditor
 
             var (x, y) = (e.Location.X / zoomFactor, e.Location.Y / zoomFactor);
 
-            if (!InsideBounds(x, y)) return;
-
-            var black = cbBlackFill.Checked;
-
-            bmpArt.SetPixel(
-                x, y,
-                black ? Color.Black : Color.White);
-
-            pbArt.Refresh();
+            PutPixel(x, y);
         }
 
         private void Form1_MouseUp(object sender, MouseEventArgs e)
