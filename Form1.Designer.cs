@@ -62,6 +62,7 @@
             pbArt.Size = new Size(128, 128);
             pbArt.TabIndex = 2;
             pbArt.TabStop = false;
+            pbArt.Paint += pbArt_Paint;
             pbArt.MouseDown += pbArt_MouseDown;
             pbArt.MouseMove += pbArt_MouseMove;
             pbArt.MouseUp += pbArt_MouseUp;

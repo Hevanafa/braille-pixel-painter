@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace BraillePixelEditor
 {
+    /// <summary>
+    /// https://stackoverflow.com/questions/24701703
+    /// </summary>
     internal class DirectBitmap : IDisposable
     {
         public Bitmap Bitmap { get; private set; }

@@ -1,3 +1,5 @@
+using System.Drawing.Drawing2D;
+
 namespace BraillePixelEditor
 {
     public partial class Form1 : Form
@@ -6,16 +8,20 @@ namespace BraillePixelEditor
         {
             InitializeComponent();
 
-            bmpArt = new DirectBitmap(32, 32);
+            bmpArt = new DirectBitmap(16, 16);
 
             using (var g = Graphics.FromImage(bmpArt.Bitmap))
                 g.Clear(Color.White);
 
             pbArt.BackgroundImage = bmpArt.Bitmap;
+
         }
 
+        int zoomFactor = 8;
+
         readonly DirectBitmap bmpArt;
-        
+        //Bitmap displayBitmap;
+
 
         private void btnRender_Click(object sender, EventArgs e)
         {
@@ -56,8 +62,8 @@ namespace BraillePixelEditor
             }
             else
             {
-                var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
-                
+                var (x, y) = (e.Location.X / zoomFactor, e.Location.Y / zoomFactor);
+
                 //pickedColour = bmpArt.GetPixel(x, y).ToArgb();
                 FloodFill(x, y);
 
@@ -68,7 +74,8 @@ namespace BraillePixelEditor
         bool InsideBounds(int x, int y) =>
             !(x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height);
 
-        void FloodFill(int x, int y) {
+        void FloodFill(int x, int y)
+        {
             if (!InsideBounds(x, y)) return;
             if (bmpArt.GetPixel(x, y).ToArgb() ==
                 (cbBlackFill.Checked ? Color.Black : Color.White).ToArgb()) return;
@@ -92,7 +99,7 @@ namespace BraillePixelEditor
         {
             if (!isPainting) return;
 
-            var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
+            var (x, y) = (e.Location.X / zoomFactor, e.Location.Y / zoomFactor);
 
             if (!InsideBounds(x, y)) return;
 
@@ -108,6 +115,18 @@ namespace BraillePixelEditor
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
             isPainting = false;
+        }
+
+
+        private void pbArt_Paint(object sender, PaintEventArgs e)
+        {
+            // https://stackoverflow.com/questions/54720916/
+            e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+
+            e.Graphics.DrawImage(
+                bmpArt.Bitmap,
+                new Rectangle { X = 0, Y = 0, Width = pbArt.Width, Height = pbArt.Height });
         }
     }
 }
