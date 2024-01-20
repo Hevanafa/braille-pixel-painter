@@ -14,7 +14,7 @@ namespace BraillePixelEditor
             pbArt.BackgroundImage = bmpArt.Bitmap;
         }
 
-        DirectBitmap bmpArt;
+        readonly DirectBitmap bmpArt;
         
 
         private void btnRender_Click(object sender, EventArgs e)
@@ -50,12 +50,37 @@ namespace BraillePixelEditor
 
         private void pbArt_MouseDown(object sender, MouseEventArgs e)
         {
-            isPainting = true;
+            if (!cbBucketTool.Checked)
+            {
+                isPainting = true;
+            }
+            else
+            {
+                var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
+                
+                //pickedColour = bmpArt.GetPixel(x, y).ToArgb();
+                FloodFill(x, y);
 
-            //var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
-            //if (x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height) return;
+                pbArt.Refresh();
+            }
+        }
 
-            //pickedColour = bmpArt.GetPixel(x, y).ToArgb();
+        bool InsideBounds(int x, int y) =>
+            !(x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height);
+
+        void FloodFill(int x, int y) {
+            if (!InsideBounds(x, y)) return;
+            if (bmpArt.GetPixel(x, y).ToArgb() ==
+                (cbBlackFill.Checked ? Color.Black : Color.White).ToArgb()) return;
+
+            bmpArt.SetPixel(
+                x, y,
+                cbBlackFill.Checked ? Color.Black : Color.White);
+
+            FloodFill(x - 1, y);
+            FloodFill(x + 1, y);
+            FloodFill(x, y - 1);
+            FloodFill(x, y + 1);
         }
 
         private void pbArt_MouseUp(object sender, MouseEventArgs e)
@@ -69,7 +94,7 @@ namespace BraillePixelEditor
 
             var (x, y) = (e.Location.X / 4, e.Location.Y / 4);
 
-            if (x < 0 || x >= bmpArt.Width || y < 0 || y >= bmpArt.Height) return;
+            if (!InsideBounds(x, y)) return;
 
             var black = cbBlackFill.Checked;
 
