@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            txbWidth = new TextBox();
-            txbHeight = new TextBox();
             pbArt = new PictureBox();
             btnRender = new Button();
             txbBraille = new TextBox();
@@ -41,20 +39,6 @@
             btnLoad = new Button();
             ((System.ComponentModel.ISupportInitialize)pbArt).BeginInit();
             SuspendLayout();
-            // 
-            // txbWidth
-            // 
-            txbWidth.Location = new Point(287, 12);
-            txbWidth.Name = "txbWidth";
-            txbWidth.Size = new Size(100, 23);
-            txbWidth.TabIndex = 0;
-            // 
-            // txbHeight
-            // 
-            txbHeight.Location = new Point(287, 41);
-            txbHeight.Name = "txbHeight";
-            txbHeight.Size = new Size(100, 23);
-            txbHeight.TabIndex = 1;
             // 
             // pbArt
             // 
@@ -81,9 +65,12 @@
             // 
             // txbBraille
             // 
+            txbBraille.BackColor = Color.White;
+            txbBraille.BorderStyle = BorderStyle.FixedSingle;
             txbBraille.Location = new Point(12, 146);
             txbBraille.Multiline = true;
             txbBraille.Name = "txbBraille";
+            txbBraille.ReadOnly = true;
             txbBraille.Size = new Size(250, 197);
             txbBraille.TabIndex = 4;
             // 
@@ -161,8 +148,6 @@
             Controls.Add(txbBraille);
             Controls.Add(btnRender);
             Controls.Add(pbArt);
-            Controls.Add(txbHeight);
-            Controls.Add(txbWidth);
             Name = "Form1";
             Text = "Form1";
             MouseUp += Form1_MouseUp;
@@ -172,9 +157,6 @@
         }
 
         #endregion
-
-        private TextBox txbWidth;
-        private TextBox txbHeight;
         private PictureBox pbArt;
         private Button btnRender;
         private TextBox txbBraille;

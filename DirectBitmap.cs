@@ -28,7 +28,8 @@ namespace BraillePixelEditor
         /// <summary>
         /// https://stackoverflow.com/questions/26233781/
         /// </summary>
-        public static double GetBrightness(Color colour) => 0.2126 * colour.R + 0.7152 * colour.G + 0.0722 * colour.B;
+        public static double GetBrightness(Color colour) =>
+            0.2126 * colour.R + 0.7152 * colour.G + 0.0722 * colour.B;
 
         [Obsolete("Better use the load PNG button for now.")]
         public DirectBitmap(Bitmap bitmap)

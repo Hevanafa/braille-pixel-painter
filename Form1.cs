@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace BraillePixelEditor
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form, IMessageFilter
     {
         public Form1()
         {
@@ -18,8 +18,31 @@ namespace BraillePixelEditor
                 g.Clear(Color.White);
 
             pbArt.BackgroundImage = bmpArt.Bitmap;
+            pbArt.Focus();
 
+            Application.AddMessageFilter(this);
         }
+
+        //const int MK_CONTROL = 0x0008;
+        const int WM_KEYDOWN = 0x0100;
+
+        public bool PreFilterMessage(ref Message m) {
+            if (m.Msg == WM_KEYDOWN) {
+                var key = (Keys)m.WParam & Keys.KeyCode;
+                //Debug.Print($"{key}");
+
+                if (key == Keys.Z && Control.ModifierKeys == Keys.Control) {
+                    //Debug.Print("Undo!");
+                    PerformUndo();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        ActionManager actionMan = new();
 
         bool hasChanged;
         int zoomFactor = 8;
@@ -63,8 +86,12 @@ namespace BraillePixelEditor
             if (!cbBucketTool.Checked)
             {
                 isPainting = true;
+                var lastColour = bmpArt.GetPixel(x, y);
+
                 if (PutPixel(x, y))
+                {
                     hasChanged = true;
+                }
             }
             else
             {
@@ -98,11 +125,23 @@ namespace BraillePixelEditor
         {
             if (!InsideBounds(x, y)) return false;
 
+            var lastColour = bmpArt.GetPixel(x, y);
+
             var black = cbBlackFill.Checked;
+            var newColour = black ? Color.Black : Color.White;
+
+            if (lastColour.ToArgb() == newColour.ToArgb()) return false;
+
+            actionMan.push(new Action()
+            {
+                Type = ActionTypes.PutPixel,
+                position = new Point(x, y),
+                lastColour = lastColour
+            });
 
             bmpArt.SetPixel(
                 x, y,
-                black ? Color.Black : Color.White);
+                newColour);
 
             pbArt.Refresh();
 
@@ -183,7 +222,8 @@ namespace BraillePixelEditor
         {
             if (hasChanged && MessageBox.Show("You have unsaved changes. Continue?", "Load PNG", MessageBoxButtons.YesNo) == DialogResult.No) return;
 
-            if (ofd.ShowDialog() == DialogResult.OK) {
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
                 try
                 {
                     var filename = ofd.FileName;
@@ -192,15 +232,38 @@ namespace BraillePixelEditor
                         for (var y = 0; y < bmpArt.Height; y++)
                             for (var x = 0; x < bmpArt.Width; x++)
                                 bmpArt.SetPixel(x, y,
+                                    // performance bottleneck
                                     DirectBitmap.GetBrightness(tempBmp.GetPixel(x, y)) >= 0.5
                                     ? Color.White
                                     : Color.Black);
 
                     pbArt.Refresh();
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     MessageBox.Show("Failed to load PNG file. Reason: " + ex.Message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        void PerformUndo() {
+            var lastAction = actionMan.pop();
+            if (lastAction == null) return;
+
+            switch (lastAction.Type)
+            {
+                case ActionTypes.PutPixel:
+                    bmpArt.SetPixel(
+                        lastAction.position.Value.X,
+                        lastAction.position.Value.Y,
+                        lastAction.lastColour.Value);
+
+                    pbArt.Refresh();
+
+                    break;
+
+                default:
+                    break;
             }
         }
     }
