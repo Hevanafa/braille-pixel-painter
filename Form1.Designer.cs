@@ -37,6 +37,8 @@
             label2 = new Label();
             cbBucketTool = new CheckBox();
             cbBlackFill = new CheckBox();
+            btnSave = new Button();
+            btnLoad = new Button();
             ((System.ComponentModel.ISupportInitialize)pbArt).BeginInit();
             SuspendLayout();
             // 
@@ -125,11 +127,33 @@
             cbBlackFill.Text = "Black";
             cbBlackFill.UseVisualStyleBackColor = true;
             // 
+            // btnSave
+            // 
+            btnSave.Location = new Point(320, 146);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(75, 42);
+            btnSave.TabIndex = 9;
+            btnSave.Text = "Save as PNG";
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
+            // 
+            // btnLoad
+            // 
+            btnLoad.Location = new Point(320, 194);
+            btnLoad.Name = "btnLoad";
+            btnLoad.Size = new Size(75, 42);
+            btnLoad.TabIndex = 10;
+            btnLoad.Text = "Load from PNG";
+            btnLoad.UseVisualStyleBackColor = true;
+            btnLoad.Click += btnLoad_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(407, 364);
+            Controls.Add(btnLoad);
+            Controls.Add(btnSave);
             Controls.Add(cbBlackFill);
             Controls.Add(cbBucketTool);
             Controls.Add(label2);
@@ -158,5 +182,7 @@
         private Label label2;
         private CheckBox cbBucketTool;
         private CheckBox cbBlackFill;
+        private Button btnSave;
+        private Button btnLoad;
     }
 }

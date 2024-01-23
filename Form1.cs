@@ -1,5 +1,8 @@
 using System.Drawing.Drawing2D;
 using System.Text;
+using System.Drawing.Imaging;
+using System.Diagnostics;
+using System.Drawing;
 
 namespace BraillePixelEditor
 {
@@ -18,9 +21,10 @@ namespace BraillePixelEditor
 
         }
 
+        bool hasChanged;
         int zoomFactor = 8;
 
-        readonly DirectBitmap bmpArt;
+        DirectBitmap bmpArt;
         //Bitmap displayBitmap;
 
 
@@ -44,7 +48,7 @@ namespace BraillePixelEditor
                     result.Append((char)(0x2800 + Convert.ToInt32(string.Join("", cell), 2)));
                 }
 
-                result.Append(new char[] { (char) 13, (char) 10 });
+                result.Append(new char[] { (char)13, (char)10 });
             }
 
             txbBraille.Text = result.ToString();
@@ -59,11 +63,13 @@ namespace BraillePixelEditor
             if (!cbBucketTool.Checked)
             {
                 isPainting = true;
-                PutPixel(x, y);
+                if (PutPixel(x, y))
+                    hasChanged = true;
             }
             else
             {
                 FloodFill(x, y);
+                hasChanged = true;
                 pbArt.Refresh();
             }
         }
@@ -87,8 +93,10 @@ namespace BraillePixelEditor
             FloodFill(x, y + 1);
         }
 
-        void PutPixel(int x, int y) {
-            if (!InsideBounds(x, y)) return;
+        /// <returns>true if inside bounds</returns>
+        bool PutPixel(int x, int y)
+        {
+            if (!InsideBounds(x, y)) return false;
 
             var black = cbBlackFill.Checked;
 
@@ -97,7 +105,10 @@ namespace BraillePixelEditor
                 black ? Color.Black : Color.White);
 
             pbArt.Refresh();
+
+            return true;
         }
+
 
         private void pbArt_MouseUp(object sender, MouseEventArgs e)
         {
@@ -128,6 +139,69 @@ namespace BraillePixelEditor
             e.Graphics.DrawImage(
                 bmpArt.Bitmap,
                 new Rectangle { X = 0, Y = 0, Width = pbArt.Width, Height = pbArt.Height });
+        }
+
+        /// <summary>
+        /// https://stackoverflow.com/questions/116050/
+        /// </summary>
+        readonly SaveFileDialog sfd = new()
+        {
+            Filter = "PNG image|*.png|All files|*.*",
+            InitialDirectory = Environment.GetFolderPath(
+                    Environment.SpecialFolder.MyPictures)
+        };
+
+        readonly OpenFileDialog ofd = new()
+        {
+            Filter = "PNG image|*.png|All files|*.*",
+            InitialDirectory = Environment.GetFolderPath(
+                    Environment.SpecialFolder.MyPictures),
+            Multiselect = false
+        };
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            Debug.Print(sfd.InitialDirectory);
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                var filename = sfd.FileName;
+
+                try
+                {
+                    bmpArt.Bitmap.Save(filename, ImageFormat.Png);
+                    hasChanged = false;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to save as PNG. Reason: " + ex.Message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            if (hasChanged && MessageBox.Show("You have unsaved changes. Continue?", "Load PNG", MessageBoxButtons.YesNo) == DialogResult.No) return;
+
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                try
+                {
+                    var filename = ofd.FileName;
+
+                    using (var tempBmp = (Bitmap)Image.FromFile(filename))
+                        for (var y = 0; y < bmpArt.Height; y++)
+                            for (var x = 0; x < bmpArt.Width; x++)
+                                bmpArt.SetPixel(x, y,
+                                    DirectBitmap.GetBrightness(tempBmp.GetPixel(x, y)) >= 0.5
+                                    ? Color.White
+                                    : Color.Black);
+
+                    pbArt.Refresh();
+                }
+                catch (Exception ex) {
+                    MessageBox.Show("Failed to load PNG file. Reason: " + ex.Message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }
